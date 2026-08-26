@@ -1,0 +1,1018 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Game Schedule Maker v8</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--text:#22272d;--muted:#707781;--line:#dfe3e8;--green:#26734d;--soft:#eaf5ef;--red:#fde7e7;--yellow:#fff4cf;--blue:#eef3f8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text)}
+.wrap{max-width:1020px;margin:auto;padding:22px 14px 60px}h1{font-size:24px;margin:0}.muted{color:var(--muted)}.mini{font-size:13px}
+.step{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.step>.head{cursor:pointer;user-select:none}.step>.head:after{content:'⌄';margin-left:auto;color:#3f474f;font-size:22px;font-weight:800;width:32px;height:32px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;line-height:1;background:#fafafa}.step.collapsed>.head:after{content:'›';transform:none}.step.collapsed>.body{display:none}.step.collapsed{overflow:hidden}
+.stepSummary{font-size:12px;color:var(--muted);margin-top:2px}.head{display:flex;gap:10px;align-items:center;padding:11px 14px}.num{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--soft);color:var(--green);font-weight:700;flex:none}.body{padding:0 14px 11px}.connector{height:10px;border-left:2px solid var(--line);margin-left:29px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}label{font-size:13px;color:var(--muted)}input,select,button{font:inherit}input,select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--text);margin-top:4px}.btn{padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer}.primary{background:var(--green);border-color:var(--green);color:#fff}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.pill{padding:5px 9px;border:1px solid var(--line);border-radius:999px}.card{border:1px solid var(--line);border-radius:11px;padding:11px;margin-top:8px}.actions{margin-left:auto;display:flex;gap:5px}.tiny{padding:5px 8px;font-size:12px}.hidden{display:none!important}.soft{background:var(--soft);padding:10px;border-radius:10px;margin-top:8px}.bad{background:var(--red);padding:10px;border-radius:10px;margin-top:8px}.warn{background:var(--yellow);padding:10px;border-radius:10px;margin-top:8px}
+.group{margin-top:14px;border:1px solid var(--line);border-radius:12px;overflow:hidden}.grouphead{font-weight:700;padding:10px 12px;background:#f8f9fa;border-bottom:1px solid var(--line)}.clubgroup{padding:9px 12px;border-bottom:1px solid #eef0f2}.clubgroup:last-child{border-bottom:0}.clubname{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase}.teamline{display:flex;align-items:center;gap:7px;padding:6px 0 2px 10px}.teamline .teamlabel{font-weight:400}.dhTeam{background:var(--yellow)!important;border-color:#e2c86d!important}.timePrimary{font-weight:800;font-size:15px}.dateToggle{font-size:11px;padding:3px 6px;border:1px solid var(--line);border-radius:7px;background:#fff;margin-left:5px}.dateEditWrap{margin-top:5px}.rule{border:1px solid var(--line);border-radius:11px;padding:11px;margin-top:8px}
+.schedule-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.filterbtn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 11px;cursor:pointer}.filterbtn.active{background:var(--green);color:#fff;border-color:var(--green)}.checker{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin:12px 0 18px}.metric{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px}.metric b{display:block;font-size:18px}.metric span{font-size:11px;color:var(--muted)}
+.week{background:transparent;margin-top:42px}.week:first-child{margin-top:18px}.weekhead{border-top:4px solid var(--green);padding:10px 2px 8px;display:flex;justify-content:space-between;align-items:end}.weektitle{font-size:16px;font-weight:800}.weekmeta{font-size:12px;color:var(--muted)}.weekbody{padding-top:8px}.divhead{padding:7px 10px;margin-top:8px;background:var(--soft);font-weight:700;border-radius:7px}
+.gamecard{display:grid;grid-template-columns:minmax(135px,1fr) 44px minmax(135px,1fr) minmax(145px,1fr) 150px;gap:8px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--line)}.gamecard select,.gamecard input{margin:0;padding:8px;font-size:14px}.vs{text-align:center;font-weight:700;color:var(--muted)}.repeat{display:inline-grid;place-items:center;min-width:21px;height:21px;padding:0 5px;border-radius:999px;background:#eceff2;color:#5f6770;font-size:11px;font-weight:800;margin-left:3px}.byeRow{background:var(--blue)}.statusline{grid-column:1/-1;font-size:12px;padding:0 4px 3px;color:var(--muted)}.statusline.conflict{color:#a52727;font-weight:600}.dh{display:inline-block;font-size:10px;font-weight:800;padding:2px 5px;border-radius:999px;background:#fff1c2;color:#8a6500;margin-left:5px}.diag{border:1px solid var(--line);border-radius:11px;margin-top:8px;overflow:hidden}.diaghead{padding:9px 10px;background:#fafafa;font-weight:700}.diagbody{padding:10px}.statgrid{display:grid;grid-template-columns:2fr repeat(4,1fr);gap:1px;background:var(--line);margin-top:8px}.statgrid>div{background:#fff;padding:7px}.note{font-size:12px;color:var(--muted);margin-top:6px}
+@media(max-width:780px){.grid,.grid3{grid-template-columns:1fr}.gamecard{grid-template-columns:1fr 34px 1fr}.gamecard .fieldEdit,.gamecard .dateTimeEdit{grid-column:1/-1}.weekhead{flex-direction:column;align-items:flex-start}.checker{grid-template-columns:repeat(2,1fr)}.statgrid{font-size:12px}}
+
+.topbar{position:sticky;top:0;z-index:30;background:white;border:1px solid var(--line);border-radius:12px;padding:9px;margin-bottom:14px;display:flex;gap:8px;align-items:center}.topbar .grow{flex:1}.tab{padding:8px 11px;border:1px solid var(--line);background:white;border-radius:9px}.tab.active{background:var(--green);color:white;border-color:var(--green)}.pubstate{font-size:12px;color:var(--muted)}
+.publicFilters{background:white;border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0}
+.pweek{margin-top:42px}.pweek:first-child{margin-top:18px}.pweekhead{border-top:4px solid var(--green);padding:10px 2px 8px}.pwk{font-size:16px;font-weight:800}.pdate{font-size:16px;font-weight:600;margin-left:5px}
+.pcols,.pgame{display:grid;grid-template-columns:minmax(130px,1fr) 44px minmax(130px,1fr) minmax(135px,.9fr) 105px;gap:8px}.pcols{padding:5px 4px 7px;border-bottom:1px solid var(--line);font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase}.pgame{align-items:center;padding:11px 4px;border-bottom:1px solid var(--line)}
+.pteam{background:white;border:1px solid var(--line);border-radius:9px;padding:9px 10px}.pclub{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase}.ptname{font-weight:700}.pvs{text-align:center;color:var(--muted);font-weight:700}.pfield{font-weight:600}.ptime{font-weight:800}.pdt{font-size:11px;color:var(--muted)}.pbye{background:#f3f4f5;border:1px solid var(--line);border-radius:9px;padding:9px;text-align:center;font-weight:700;color:var(--muted)}.pdiv{font-weight:700;background:var(--soft);padding:7px 10px;border-radius:7px;margin-top:10px}.pempty{background:white;border:1px solid var(--line);border-radius:14px;padding:24px;text-align:center;color:var(--muted);margin-top:18px}
+@media(max-width:760px){.publicFilters{grid-template-columns:1fr 1fr}.pgame{grid-template-columns:1fr 32px 1fr}.pfield,.pwhen{grid-column:1/-1}.pcols{grid-template-columns:1fr 32px 1fr}.pcols .mobhide{display:none}.topbar{flex-wrap:wrap}}
+
+.advancedRules{margin-top:10px;border-top:1px solid var(--line);padding-top:9px}
+.restrictionRow{display:grid;grid-template-columns:1fr 1fr 1fr 150px;gap:7px;align-items:end;margin-top:8px}
+.linkTeam{background:none;border:0;padding:0;color:var(--green);font:inherit;font-weight:700;cursor:pointer;text-align:left}
+.activeTeamFilter{display:flex;align-items:center;gap:8px;background:var(--soft);border-radius:10px;padding:8px 10px;margin:8px 0 12px}
+.activeTeamFilter button{margin-left:auto}
+.balanceWarn{background:var(--yellow)!important}
+.balanceGood{color:var(--green);font-weight:700}
+.summaryHint{font-size:12px;color:var(--muted);margin:6px 0}
+@media(max-width:760px){.restrictionRow{grid-template-columns:1fr 1fr}}
+
+.csvBox{margin-top:10px;border:1px dashed var(--line);border-radius:11px;padding:10px}
+.csvPreview{margin-top:8px}
+.gameSearch{display:flex;gap:7px;align-items:end;flex-wrap:wrap;margin:8px 0 12px}
+.gameSearch label{min-width:150px}
+.gameNo{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:3px}
+.noteBtn{position:relative}
+.noteCount{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--yellow);font-size:11px;font-weight:800;margin-left:4px}
+.notesPanel{border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px;margin:10px 0}
+.noteItem{border:1px solid var(--line);border-radius:10px;padding:9px;margin-top:7px}
+.noteItem.resolved{opacity:.55}
+.noteMeta{font-size:11px;color:var(--muted);margin-top:3px}
+.detailToggle{font-size:11px;padding:4px 7px}
+.gameDetails{grid-column:1/-1;border-top:1px dashed var(--line);padding:8px 4px 2px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.scorePair{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+@media(max-width:760px){.gameDetails{grid-template-columns:1fr}.scorePair{grid-template-columns:1fr 1fr}}
+
+.notesTop{margin-bottom:12px}
+.notesTopBar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.notesTopBar .grow{flex:1}
+.notesPanelPersistent{border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px;margin-top:8px}
+.noteFormGrid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;align-items:end}
+.noteResolvedWrap{display:flex;align-items:center;gap:6px;padding:8px 0}
+.noteResolvedWrap input{width:auto;margin:0}
+.noteItemRow{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:start}
+.noteCheck{width:18px;height:18px;margin-top:2px}
+.noteMain{min-width:0}
+.noteTitle{font-weight:700}
+.noteTextLine{margin-top:2px}
+.noteEditFields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:7px}
+@media(max-width:820px){.noteFormGrid{grid-template-columns:1fr 1fr}.noteFormGrid .noteWide{grid-column:1/-1}.noteEditFields{grid-template-columns:1fr}}
+
+#persistentNotesBtn{position:static;box-shadow:none}
+#persistentNotesPanel{position:fixed;right:18px;top:82px;z-index:89;width:min(760px,calc(100vw - 36px));max-height:72vh;overflow:auto;resize:both;box-shadow:0 8px 28px rgba(0,0,0,.16);cursor:default}
+#persistentNotesPanel .notesTopBar{cursor:move;user-select:none}
+
+body{background:#eef1ed}
+.wrap{background:transparent}
+.step{background:#fff;border:1px solid #d5ddd5;box-shadow:0 2px 8px rgba(27,60,42,.06)}
+.step.collapsed{background:#f7f9f6}
+#scheduleWrap{background:#f7f9f6;border:1px solid #cbd7cc;border-radius:14px;padding:14px}
+.gamecard{background:#fff;border:1px solid #d8dfd8;margin-bottom:8px}
+.gamecard:has(.gameDetails:not(.hidden)){margin-bottom:18px;border-color:#bfcbbf;box-shadow:0 3px 10px rgba(27,60,42,.07)}
+.gameDetails{background:#f7f9f6;border:1px solid #dbe2db;border-radius:9px;margin-top:5px;padding:10px!important}
+.byeRow{background:#fff!important}
+.byePill{display:inline-block;background:#dbeafe;color:#1e4f8a;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:800}
+
+.byeTeam{background:#dbeafe!important;border-color:#a9c9ee!important}
+.publicByeTeam{background:#dbeafe!important;border-color:#a9c9ee!important}
+
+.maxRepeat{background:#f3d7dc!important;color:#7d2432!important}
+.conflictCard{border:2px solid #7d2432!important}
+.usedSlot{color:#9aa0a6}
+.gameNoWrap{font-size:11px;color:var(--muted);font-weight:700}
+.bottomClear{display:flex;justify-content:center;margin:18px 0 4px}
+.fieldCsvBox{margin-top:10px;border:1px dashed var(--line);border-radius:11px;padding:10px}
+.byeCountPill{display:inline-block;background:#dbeafe;color:#1e4f8a;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:800}
+
+.projectbar{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#fff;border:1px solid #cbd7cc;border-radius:12px;padding:10px 12px;margin-bottom:10px;box-shadow:0 2px 8px rgba(27,60,42,.05)}
+.projectbar .actions{display:flex;gap:7px;flex-wrap:wrap}
+@media(max-width:700px){.projectbar{align-items:flex-start;flex-direction:column}}
+
+.scheduleControls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0 10px}
+.scheduleControls select,.scheduleControls input{margin:0}
+.controlSelect{min-width:150px}
+.gameSearchCompact{display:flex;gap:6px;align-items:center;margin-left:auto}
+.gameSearchCompact input{width:120px;margin:0}
+.gameNoCol{font-size:11px;color:var(--muted);font-weight:800;text-align:center;align-self:center}
+.gamecard{grid-template-columns:52px minmax(135px,1fr) 44px minmax(135px,1fr) minmax(145px,1fr) 118px!important}
+@media(max-width:780px){.gamecard{grid-template-columns:42px 1fr 34px 1fr!important}.gameNoCol{font-size:10px}.gameSearchCompact{margin-left:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="topbar"><button id="adminTab" class="tab active">Admin Builder</button><button id="persistentNotesBtn" class="tab">Notes <span id="persistentNoteCount" class="noteCount">0</span></button><button id="publicTab" class="tab">Public View</button><div class="grow"></div><button id="jumpSchedule" class="btn hidden">Jump to League Schedule ↓</button><span id="pubState" class="pubstate">Not published</span><button id="publishBtn" class="btn primary">Publish Schedule</button></div>
+<div id="persistentNotesPanel" class="notesPanelPersistent hidden">
+  <div class="notesTopBar"><b>Scheduling Notes</b><span class="mini muted">General until you attach team, division, or game.</span><div class="grow"></div><button id="closePersistentNotes" class="btn tiny">Close</button></div>
+  <div class="noteFormGrid" style="margin-top:8px">
+    <label class="noteWide">Note<input id="persistentNoteText" placeholder="Example: Can't play before 11:00"></label>
+    <label>Team<select id="persistentNoteTeam"></select></label>
+    <label>Division<select id="persistentNoteDivision"></select></label>
+    <label>Game #<select id="persistentNoteGame"></select></label>
+    <label class="noteResolvedWrap"><input id="persistentNoteResolved" type="checkbox"> Resolved</label>
+  </div>
+  <button id="addPersistentNote" class="btn primary" style="margin-top:8px">Add Note</button>
+  <div id="persistentNotesList"></div>
+</div>
+<div id="adminView">
+<h1>Game Schedule Maker</h1><div class="muted">Build the league top-to-bottom, then fine-tune the generated schedule directly.</div><br>
+<div class="projectbar"><div><b>Project</b> <span id="projectSaveStatus" class="mini muted">Autosaves in this browser</span></div><div class="actions"><button id="saveProjectFile" class="btn">Save Project</button><label class="btn" style="cursor:pointer">Load Project<input id="loadProjectFile" type="file" accept=".json,application/json" style="display:none"></label></div></div><section class="step"><div class="head"><div class="num">1</div><div><b>Season Setup</b><div class="mini muted">Overall league window.</div></div></div><div class="body grid"><label>Season name<input id="season" placeholder="Fall 2026"></label><label>Normal game day<select id="leagueDay"><option value="6">Saturday</option><option value="0">Sunday</option></select></label><label>Earliest date<input id="leagueStart" type="date"></label><label>Latest date<input id="leagueEnd" type="date"></label></div></section><div class="connector"></div>
+<section class="step"><div class="head"><div class="num">2</div><div><b>Clubs</b><div class="mini muted">Add each participating club.</div></div></div><div class="body"><div class="row"><input id="clubName" style="flex:1" placeholder="Add New Club"><button id="addClub" class="btn primary">Add Club</button></div><div id="clubs"></div></div></section><div class="connector"></div>
+<section class="step"><div class="head"><div class="num">3</div><div><b>Fields & Availability</b><div class="mini muted">Choose which age groups can use each field.</div></div></div><div class="body"><div class="grid"><label>Field name<input id="fieldName" placeholder="Field A"></label><label>Home club<select id="fieldClub"></select></label><label>Available from<input id="fieldFrom" type="time" value="09:00"></label><label>Available until<input id="fieldTo" type="time" value="16:00"></label></div><div class="mini muted" style="margin-top:9px">Allowed age groups</div><div id="fieldAges" class="row" style="margin-top:5px"></div><div class="row" style="margin-top:9px"><input id="newAge" style="flex:1" placeholder="Create New Age Group"><button id="addAge" class="btn">+ Add Age Group</button></div><div class="row" style="margin-top:9px"><button id="addField" class="btn primary">Add Field</button><button id="cancelField" class="btn hidden">Cancel Edit</button></div><div class="fieldCsvBox">
+<div class="row"><b>Import Fields from CSV</b><span class="mini muted">Field Name, Club, Age Groups, Available From, Available Until</span></div>
+<div class="row" style="margin-top:7px"><input id="fieldCsvFile" type="file" accept=".csv,text/csv" style="flex:1"><button id="downloadFieldCsvTemplate" class="btn">Download Field Template</button></div>
+<div id="fieldCsvPreview"></div>
+</div><div id="fields"></div></div></section><div class="connector"></div>
+<section class="step"><div class="head"><div class="num">4</div><div><b>Create Divisions</b><div class="mini muted">Each division can use different dates and game-block lengths.</div></div></div><div class="body"><div class="grid3"><label>League<input id="divLeague" placeholder="e.g. Rec or RCL"></label><label>Age group<select id="divAge"></select></label><label>Gender<select id="divGender"><option>Girls</option><option>Boys</option><option>Coed</option></select></label><label>Start date<input id="divStart" type="date"></label><label>End date<input id="divEnd" type="date"></label><label>Game block (minutes)<input id="divBlock" type="number" min="15" step="5" value="75"></label></div><div class="grid3" style="margin-top:7px"><label>Optional Pool / Level<input id="divPool" placeholder="e.g. Gold, North"></label></div><div class="row" style="margin-top:9px"><button id="saveDivision" class="btn primary">Add Division</button><button id="cancelDivision" class="btn hidden">Cancel Edit</button></div><div id="divisions"></div></div></section><div class="connector"></div>
+<section class="step"><div class="head"><div class="num">5</div><div><b>Add Teams</b><div class="mini muted">Teams are grouped by division and club below.</div></div></div><div class="body"><div class="csvBox">
+  <div class="row"><b>Import Teams from CSV</b><span class="mini muted">Required: Club, Age Group, Gender, Team Name • League optional if only one league</span></div>
+  <div class="row" style="margin-top:7px">
+    <input id="csvFile" type="file" accept=".csv,text/csv" style="flex:1">
+    <button id="downloadCsvTemplate" class="btn">Download Template</button>
+  </div>
+  <div id="csvPreview" class="csvPreview"></div>
+</div>
+<div class="grid3"><label>Team name<input id="teamName" placeholder="Team name"></label><label>Club<select id="teamClub"></select></label><label>Division<select id="teamDivision"></select></label></div><div class="row" style="margin-top:9px"><button id="saveTeam" class="btn primary">Add New Team</button><button id="cancelTeam" class="btn hidden">Cancel Edit</button></div><div id="teamAlert"></div><div id="teams"></div></div></section><div class="connector"></div>
+<section class="step"><div class="head"><div class="num">6</div><div><b>Scheduling Rules by Division</b><div class="mini muted">The engine builds the week structure first, then places those games onto fields and times.</div></div></div><div class="body"><div id="rules"></div>
+<div class="advancedRules"><details><summary><b>Advanced Matchup Rules</b> <span class="mini muted">optional</span></summary>
+<div class="restrictionRow">
+<label>Division<select id="restDivision"></select></label>
+<label>Team A<select id="restTeamA"></select></label>
+<label>Team B<select id="restTeamB"></select></label>
+<label>Rule<select id="restType"><option value="never">Never Play</option><option value="avoid">Avoid If Possible</option></select></label>
+</div>
+<button id="addRestriction" class="btn" style="margin-top:8px">Add Restriction</button>
+<div id="restrictionList"></div></details></div>
+<button id="checkSetup" class="btn" style="width:100%;margin-top:10px">Run Setup Check</button><div id="setupCheck"></div><button id="generate" class="btn primary" style="width:100%;margin-top:10px">Generate Weekly Matchups ↓</button><div id="genError"></div></div></section>
+<div id="reviewWrap" class="hidden"><div class="connector"></div><section class="step"><div class="head"><div class="num">7</div><div><b>Review Matchups</b><div class="mini muted">BYEs and doubleheaders are intentionally created here before field allocation.</div></div></div><div class="body"><div id="summaries"></div><button id="build" class="btn primary" style="width:100%;margin-top:10px">Assign Fields & Times ↓</button></div></section></div>
+<div id="scheduleWrap" class="hidden"><div class="connector"></div><section class="step"><div class="head"><div class="num">8</div><div><b>League Schedule</b><div class="mini muted">Edit any matchup element directly. Changes are checked immediately.</div></div></div><div class="body"><div class="scheduleControls">
+<select id="scheduleAgeFilter" class="controlSelect"><option value="all">Age Group: All</option></select>
+<select id="scheduleGenderFilter" class="controlSelect"><option value="all">Gender: All</option></select>
+<select id="scheduleSort" class="controlSelect"><option value="default">Default Order</option><option value="field">Sort: Field & Time</option><option value="team">Sort: Team</option><option value="game">Sort: Game #</option></select>
+<div class="gameSearchCompact"><input id="gameSearchInput" type="number" min="1" placeholder="Game #"><button id="gameSearchBtn" class="btn">Find</button><button id="clearGameSearch" class="btn hidden">Clear</button></div>
+</div>
+<div id="divisionFilters" class="row"></div>
+<div id="teamFilterBanner"></div><div id="checker"></div><div id="schedule"></div><div id="diagnostics"></div></div></section></div>
+</div>
+</div>
+<div id="publicView" class="hidden">
+<h1 id="pTitle">League Schedule</h1><div class="muted">Find your division, club, team, or week.</div>
+<div class="publicFilters"><label>Division<select id="pDivision"></select></label><label>Club<select id="pClub"></select></label><label>Team<select id="pTeam"></select></label><label>Week<select id="pWeek"></select></label></div>
+<div id="pSchedule"></div>
+</div>
+<script>
+let S={ages:['Kinder','U8','U10','U12','U14'],clubs:[],fields:[],divisions:[],teams:[],weekly:[],allocation:[],activeDiv:'all',activeTeam:'all',activeAge:'all',activeGender:'all',restrictions:[],notes:[],gameSearch:''};
+
+const PROJECT_SCHEMA_VERSION=1,AUTOSAVE_KEY='gameScheduleMaker_stable_v1';
+function migrateProject(raw){
+ let x=raw&&raw.state?raw.state:raw;if(!x||typeof x!=='object')throw new Error('Invalid project file.');
+ let base={ages:['Kinder','U8','U10','U12','U14'],clubs:[],fields:[],divisions:[],teams:[],weekly:[],allocation:[],activeDiv:'all',activeTeam:'all',activeAge:'all',activeGender:'all',restrictions:[],notes:[],gameSearch:''};
+ return Object.assign(base,x);
+}
+function projectPayload(){return{app:'Game Schedule Maker',schemaVersion:PROJECT_SCHEMA_VERSION,savedAt:new Date().toISOString(),state:S}}
+function autosaveProject(){try{localStorage.setItem(AUTOSAVE_KEY,JSON.stringify(projectPayload()));let e=$('projectSaveStatus');if(e)e.textContent='Autosaved '+new Date().toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}catch(e){}}
+function downloadProject(){let blob=new Blob([JSON.stringify(projectPayload(),null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='game-schedule-project.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function renderAllStable(){
+ renderAges();renderClubs();sync();renderFields();renderDivs();renderTeams();renderRules();refreshRestrictionControls();renderNotes();updateStepSummaries();
+ if(S.allocation.length){$('finalWrap').classList.remove('hidden');renderFinal()}
+ else if(S.weekly.length){$('reviewWrap').classList.remove('hidden')}
+}
+let editDiv=null,editTeam=null,editField=null;const $=id=>document.getElementById(id),uid=p=>p+Date.now()+Math.random().toString(16).slice(2);function club(id){return S.clubs.find(x=>x.id===id)}function div(id){return S.divisions.find(x=>x.id===id)}function teamObj(id){return S.teams.find(x=>x.id===id)}function pk(a,b){return[a,b].sort().join('|')}
+function sync(){for(const id of ['fieldClub','teamClub'])$(id).innerHTML=S.clubs.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')||'<option value="">Add clubs first</option>';$('teamDivision').innerHTML=S.divisions.map(d=>`<option value="${d.id}">${divLabel(d)}</option>`).join('')||'<option value="">Add divisions first</option>';$('divAge').innerHTML=S.ages.map(a=>`<option>${a}</option>`).join('');$('fieldAges').innerHTML=S.ages.map(a=>`<label><input class="fa" style="width:auto" type="checkbox" value="${a}"> ${a}</label>`).join('')}
+$('addAge').onclick=()=>{let n=$('newAge').value.trim();if(n&&!S.ages.includes(n)){S.ages.push(n);$('newAge').value='';sync()}};$('addClub').onclick=()=>{let n=$('clubName').value.trim();if(!n||S.clubs.some(c=>c.name.toLowerCase()===n.toLowerCase()))return;S.clubs.push({id:uid('c'),name:n});$('clubName').value='';renderClubs();sync()};function renderClubs(){$('clubs').innerHTML=S.clubs.map(c=>`<div class="card"><b>${c.name}</b></div>`).join('')}
+$('addField').onclick=()=>{
+  let f={name:$('fieldName').value.trim(),club:$('fieldClub').value,from:$('fieldFrom').value,to:$('fieldTo').value,ages:[...document.querySelectorAll('.fa:checked')].map(x=>x.value)};
+  if(!f.name||!f.club||!f.ages.length)return;
+  if(editField){
+    let existing=S.fields.find(x=>x.id===editField);
+    Object.assign(existing,f);
+    S.allocation.forEach(g=>{if(g.fieldId===editField)g.field=existing.name});
+    editField=null;$('addField').textContent='Add Field';$('cancelField').classList.add('hidden');
+  }else S.fields.push({id:uid('f'),...f});
+  $('fieldName').value='';document.querySelectorAll('.fa').forEach(x=>x.checked=false);renderFields();updateStepSummaries()
+};
+$('cancelField').onclick=()=>{editField=null;$('fieldName').value='';document.querySelectorAll('.fa').forEach(x=>x.checked=false);$('addField').textContent='Add Field';$('cancelField').classList.add('hidden')};
+
+let pendingFieldCsv=[];
+$('fieldCsvFile').onchange=async e=>{
+  let file=e.target.files?.[0];if(!file)return;
+  let text=await file.text(),lines=text.split(/\r?\n/).filter(x=>x.trim());if(!lines.length)return;
+  let h=parseCsvLine(lines[0]).map(norm);
+  let fi=h.findIndex(x=>x==='field name'||x==='field'),ci=h.indexOf('club'),
+      ai=h.findIndex(x=>x==='age groups'||x==='age group'||x==='ages'),
+      fromi=h.findIndex(x=>x==='available from'||x==='from'),
+      toi=h.findIndex(x=>x==='available until'||x==='until'||x==='to');
+  if([fi,ci,ai,fromi,toi].some(x=>x<0)){$('fieldCsvPreview').innerHTML='<div class="bad">Field CSV needs: Field Name, Club, Age Groups, Available From, Available Until.</div>';return}
+  pendingFieldCsv=lines.slice(1).map(parseCsvLine).map(r=>({name:r[fi]?.trim(),club:r[ci]?.trim(),ages:(r[ai]||'').split(/[;|]/).map(x=>x.trim()).filter(Boolean),from:r[fromi]?.trim(),to:r[toi]?.trim()})).filter(r=>r.name&&r.club&&r.ages.length&&r.from&&r.to);
+  $('fieldCsvPreview').innerHTML=`<div class="soft"><b>${pendingFieldCsv.length} fields found</b></div><button id="confirmFieldCsvImport" class="btn primary" style="margin-top:7px">Import Fields</button>`;
+  $('confirmFieldCsvImport').onclick=importFieldCsv;
+};
+function importFieldCsv(){
+  let added=0,skipped=0;
+  for(const r of pendingFieldCsv){
+    let c=S.clubs.find(x=>norm(x.name)===norm(r.club));if(!c){c={id:uid('c'),name:r.club};S.clubs.push(c)}
+    if(S.fields.some(f=>norm(f.name)===norm(r.name)&&f.club===c.id)){skipped++;continue}
+    r.ages.forEach(a=>{if(!S.ages.some(x=>norm(x)===norm(a)))S.ages.push(a)});
+    S.fields.push({id:uid('f'),name:r.name,club:c.id,from:r.from,to:r.to,ages:r.ages});added++;
+  }
+  renderClubs();sync();renderFields();updateStepSummaries();
+  $('fieldCsvPreview').innerHTML=`<div class="soft"><b>${added} fields imported.</b><div class="mini">${skipped} duplicates skipped.</div></div>`;
+}
+$('downloadFieldCsvTemplate').onclick=()=>{
+  let blob=new Blob(['Field Name,Club,Age Groups,Available From,Available Until\nTwin Creeks A,CVFC,U10;U12,09:00,16:00\n'],{type:'text/csv'});
+  let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='schedule_field_import_template.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};
+
+function renderFields(){
+  $('fields').innerHTML=S.fields.map(f=>`<div class="card row"><div><b>${f.name}</b><div class="mini muted">${club(f.club)?.name} • ${f.ages.join(', ')} • ${f.from}–${f.to}</div></div><div class="actions"><button class="btn tiny" data-ef="${f.id}">Edit</button><button class="btn tiny" data-df="${f.id}">Delete</button></div></div>`).join('');
+  document.querySelectorAll('[data-ef]').forEach(b=>b.onclick=e=>{e.stopPropagation();let f=S.fields.find(x=>x.id===b.dataset.ef);editField=f.id;$('fieldName').value=f.name;$('fieldClub').value=f.club;$('fieldFrom').value=f.from;$('fieldTo').value=f.to;document.querySelectorAll('.fa').forEach(x=>x.checked=f.ages.includes(x.value));$('addField').textContent='Save Field';$('cancelField').classList.remove('hidden')});
+  document.querySelectorAll('[data-df]').forEach(b=>b.onclick=e=>{e.stopPropagation();let id=b.dataset.df,used=S.allocation.some(g=>g.fieldId===id);let ok=used?confirm('This field is used by generated games. Delete it and mark those games unassigned?'):confirm('Delete this field?');if(ok){S.fields=S.fields.filter(f=>f.id!==id);S.allocation.forEach(g=>{if(g.fieldId===id){g.fieldId='';g.field='UNASSIGNED';g.time=0}});renderFields();if(S.allocation.length)renderFinal();updateStepSummaries()}});
+}
+$('saveDivision').onclick=()=>{
+  let league=$('divLeague').value.trim()||'League',
+      age=$('divAge').value,
+      gender=$('divGender').value,
+      pool=$('divPool').value.trim(),
+      start=$('divStart').value,
+      end=$('divEnd').value,
+      block=Math.max(15,+$('divBlock').value||75),
+      games=7,max=3,day=+$('leagueDay').value;
+  if(!start||!end)return;
+  let name=`${age} ${gender}${pool?` · ${pool}`:''}`;
+  let o={name,league,age,gender,pool,start,end,block,games,max,day};
+  if(editDiv){
+    let existing=div(editDiv);
+    games=existing.games;max=existing.max;
+    Object.assign(existing,{...o,games,max});
+    editDiv=null;
+    $('saveDivision').textContent='Add Division';
+    $('cancelDivision').classList.add('hidden');
+  }else{
+    S.divisions.push({id:uid('d'),...o});
+  }
+  $('divPool').value='';
+  renderDivs();sync();renderRules();renderTeams();
+};$('cancelDivision').onclick=()=>{editDiv=null;$('divPool').value='';$('saveDivision').textContent='Add Division';$('cancelDivision').classList.add('hidden')};
+function leagueNames(){return [...new Set(S.divisions.map(d=>d.league||'League'))]}
+function showLeague(){return leagueNames().length>1}
+function divLabel(d){return `${showLeague()?(d.league||'League')+' · ':''}${d.age} ${d.gender}${d.pool?` · ${d.pool}`:''}`}
+
+function renderDivs(){
+  refreshPersistentNoteOptions();
+  $('divisions').innerHTML=S.divisions.map(d=>`<div class="card row"><div><b>${divLabel(d)}</b><div class="mini muted">${d.start}→${d.end} • ${d.block} min</div></div><div class="actions"><button class="btn tiny" data-ed="${d.id}">Edit</button><button class="btn tiny" data-dd="${d.id}">Delete</button></div></div>`).join('');
+  document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{
+    let d=div(b.dataset.ed);editDiv=d.id;
+    $('divLeague').value=d.league||'League';
+    $('divAge').value=d.age;
+    $('divGender').value=d.gender;
+    $('divPool').value=d.pool||'';
+    $('divStart').value=d.start;
+    $('divEnd').value=d.end;
+    $('divBlock').value=d.block;
+    $('saveDivision').textContent='Save Division';
+    $('cancelDivision').classList.remove('hidden');
+  });
+  document.querySelectorAll('[data-dd]').forEach(b=>b.onclick=()=>{
+    S.teams=S.teams.filter(t=>t.division!==b.dataset.dd);
+    S.divisions=S.divisions.filter(d=>d.id!==b.dataset.dd);
+    renderDivs();sync();renderRules();renderTeams();
+  });
+}
+$('saveTeam').onclick=()=>{let o={name:$('teamName').value.trim(),club:$('teamClub').value,division:$('teamDivision').value};if(!o.name||!o.club||!o.division)return;let dup=S.teams.find(t=>t.name.toLowerCase()===o.name.toLowerCase()&&t.club===o.club&&t.division===o.division&&t.id!==editTeam);if(dup){$('teamAlert').innerHTML=`<div class="bad"><b>Duplicate team:</b> ${club(o.club)?.name} already has ${o.name} in ${div(o.division)?.name}.</div>`;return}$('teamAlert').innerHTML='';if(editTeam){Object.assign(teamObj(editTeam),o);editTeam=null;$('saveTeam').textContent='Add New Team';$('cancelTeam').classList.add('hidden')}else S.teams.push({id:uid('t'),...o});$('teamName').value='';renderTeams()};$('cancelTeam').onclick=()=>{editTeam=null;$('saveTeam').textContent='Add New Team';$('cancelTeam').classList.add('hidden')};
+function parseCsvLine(line){
+  let out=[],cur='',q=false;
+  for(let i=0;i<line.length;i++){
+    let ch=line[i];
+    if(ch==='"'){if(q&&line[i+1]==='"'){cur+='"';i++}else q=!q}
+    else if(ch===','&&!q){out.push(cur.trim());cur=''}
+    else cur+=ch;
+  }
+  out.push(cur.trim());return out;
+}
+function norm(v){return String(v??'').trim().toLowerCase().replace(/\s+/g,' ')}
+let pendingCsv=[];
+
+function findCsvDivision(row){
+  // First try exact League + Age + Gender.
+  let exact=S.divisions.find(d=>
+    norm(d.age)===norm(row.age) &&
+    norm(d.gender)===norm(row.gender) &&
+    (!row.league || norm(d.league||'')===norm(row.league))
+  );
+  if(exact)return exact;
+
+  // If there is only one matching age/gender division, use it even if league label differs.
+  let sameAG=S.divisions.filter(d=>norm(d.age)===norm(row.age)&&norm(d.gender)===norm(row.gender));
+  if(sameAG.length===1)return sameAG[0];
+
+  return null;
+}
+
+function csvAnalysis(){
+  let rows=pendingCsv, newClubs=new Set(), duplicates=0, unmapped=[], mapped={};
+  for(const r of rows){
+    let c=S.clubs.find(x=>norm(x.name)===norm(r.club));
+    if(!c)newClubs.add(r.club);
+    let d=findCsvDivision(r);
+    if(!d){unmapped.push(r);continue}
+    mapped[d.id]=(mapped[d.id]||0)+1;
+    if(c&&S.teams.some(t=>t.club===c.id&&t.division===d.id&&norm(t.name)===norm(r.name)))duplicates++;
+  }
+  return {newClubs,duplicates,unmapped,mapped};
+}
+
+function renderCsvPreview(){
+  let a=csvAnalysis();
+  let mapRows=Object.entries(a.mapped).map(([did,count])=>{
+    let d=div(did);return `<div class="teamline"><span>${divLabel(d)}</span><span class="pill">${count} teams</span></div>`;
+  }).join('');
+  let missing=[...new Set(a.unmapped.map(r=>`${r.league?`${r.league} · `:''}${r.age} ${r.gender}`))];
+
+  $('csvPreview').innerHTML=`
+    <div class="soft">
+      <b>${pendingCsv.length} teams found</b>
+      <div class="mini">${a.newClubs.size} new clubs • ${a.duplicates} duplicates • ${a.unmapped.length} teams need division mapping</div>
+      ${mapRows?`<div style="margin-top:7px"><b class="mini">Matched divisions</b>${mapRows}</div>`:''}
+    </div>
+    ${missing.length?`<div class="warn"><b>These divisions are not set up yet:</b> ${missing.join(', ')}<div class="mini" style="margin-top:4px">Create those divisions in Step 4, then return here. Existing divisions are matched by Age Group + Gender, so a single-league CSV does not need an exact League-name match.</div></div>`:''}
+    <button id="confirmCsvImport" class="btn primary" style="margin-top:7px" ${missing.length?'disabled title="Create the missing divisions first"':''}>Import ${pendingCsv.length-a.unmapped.length-a.duplicates} Teams</button>
+  `;
+  let btn=$('confirmCsvImport');if(btn&&!missing.length)btn.onclick=importCsvTeams;
+}
+
+$('csvFile').onchange=async e=>{
+  let file=e.target.files?.[0];if(!file)return;
+  let text=await file.text(),lines=text.split(/\r?\n/).filter(x=>x.trim());
+  if(!lines.length)return;
+
+  let h=parseCsvLine(lines[0]).map(norm);
+  let ci=h.indexOf('club'),
+      li=h.indexOf('league'),
+      ai=h.findIndex(x=>x==='age group'||x==='age'||x==='agegroup'),
+      gi=h.indexOf('gender'),
+      ti=h.findIndex(x=>x==='team name'||x==='team'||x==='teamname');
+
+  if([ci,ai,gi,ti].some(x=>x<0)){
+    $('csvPreview').innerHTML='<div class="bad"><b>CSV columns needed:</b> Club, Age Group, Gender, Team Name. League is optional when you only have one league.</div>';
+    return;
+  }
+
+  pendingCsv=lines.slice(1).map(parseCsvLine).map(r=>({
+    club:r[ci]?.trim(),
+    league:li>=0?r[li]?.trim():'',
+    age:r[ai]?.trim(),
+    gender:r[gi]?.trim(),
+    name:r[ti]?.trim()
+  })).filter(r=>r.club&&r.age&&r.gender&&r.name);
+
+  // If CSV omits League and builder has one league, infer it for preview/reference.
+  let leagues=leagueNames();
+  if(li<0&&leagues.length===1)pendingCsv.forEach(r=>r.league=leagues[0]);
+
+  renderCsvPreview();
+};
+
+function importCsvTeams(){
+  let a=csvAnalysis();
+  if(a.unmapped.length){renderCsvPreview();return}
+
+  let added=0,skipped=0;
+  for(const r of pendingCsv){
+    let c=S.clubs.find(x=>norm(x.name)===norm(r.club));
+    if(!c){c={id:uid('c'),name:r.club};S.clubs.push(c)}
+
+    let d=findCsvDivision(r);
+    if(!d){continue}
+
+    // If this was the only age/gender match and its league is generic/default,
+    // adopt the CSV's league label.
+    if(r.league && (!d.league || norm(d.league)==='league'))d.league=r.league;
+
+    if(S.teams.some(t=>t.club===c.id&&t.division===d.id&&norm(t.name)===norm(r.name))){
+      skipped++;continue;
+    }
+    S.teams.push({id:uid('t'),name:r.name,club:c.id,division:d.id});
+    added++;
+  }
+
+  renderClubs();sync();renderDivs();renderTeams();refreshRestrictionControls();
+  $('csvPreview').innerHTML=`<div class="soft"><b>${added} teams imported successfully.</b><div class="mini">${skipped} duplicates skipped. Team groups below have been updated.</div></div>`;
+  updateStepSummaries();
+}
+
+$('downloadCsvTemplate').onclick=()=>{
+  let blob=new Blob(['Club,League,Age Group,Gender,Team Name\nCVFC,Rec,U10,Girls,Storm\nSOSA,Rec,U10,Girls,Pirates\n'],{type:'text/csv'});
+  let a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download='schedule_team_import_template.csv';a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};
+function renderTeams(){refreshRestrictionControls();refreshPersistentNoteOptions();let out='';for(const d of S.divisions){let ts=S.teams.filter(t=>t.division===d.id);out+=`<div class="group"><div class="grouphead">${divLabel(d)} · ${ts.length} teams · ${new Set(ts.map(t=>t.club)).size} clubs</div>`;for(const c of S.clubs){let x=ts.filter(t=>t.club===c.id);if(x.length)out+=`<div class="clubgroup"><div class="clubname">${c.name} — ${x.length}</div>${x.map(t=>`<div class="teamline"><span class="teamlabel">${t.name}</span><div class="actions"><button class="btn tiny" data-et="${t.id}">Edit</button><button class="btn tiny" data-dt="${t.id}">Delete</button></div></div>`).join('')}</div>`}out+='</div>'}$('teams').innerHTML=out;document.querySelectorAll('[data-et]').forEach(b=>b.onclick=()=>{let t=teamObj(b.dataset.et);editTeam=t.id;$('teamName').value=t.name;$('teamClub').value=t.club;$('teamDivision').value=t.division;$('saveTeam').textContent='Save Team';$('cancelTeam').classList.remove('hidden')});document.querySelectorAll('[data-dt]').forEach(b=>b.onclick=()=>{S.teams=S.teams.filter(t=>t.id!==b.dataset.dt);renderTeams()})}
+function dateObj(s){let[y,m,d]=s.split('-').map(Number);return new Date(Date.UTC(y,m-1,d))}function weekDates(d){let a=[],x=dateObj(d.start),e=dateObj(d.end);while(x<=e){if(x.getUTCDay()===d.day)a.push(x.toISOString().slice(0,10));x.setUTCDate(x.getUTCDate()+1)}return a}
+function refreshRestrictionControls(){
+  if(!$('restDivision'))return;
+  $('restDivision').innerHTML=S.divisions.map(d=>`<option value="${d.id}">${divLabel(d)}</option>`).join('');
+  refreshRestrictionTeams();
+}
+function refreshRestrictionTeams(){
+  if(!$('restDivision'))return;
+  let did=$('restDivision').value;
+  let ts=S.teams.filter(t=>t.division===did);
+  let opts=ts.map(t=>`<option value="${t.id}">${club(t.club)?.name} · ${t.name}</option>`).join('');
+  $('restTeamA').innerHTML=opts;
+  $('restTeamB').innerHTML=opts;
+}
+function restrictionFor(a,b,did){
+  return S.restrictions.find(r=>r.division===did&&pk(r.a,r.b)===pk(a,b));
+}
+function renderRestrictions(){
+  if(!$('restrictionList'))return;
+  $('restrictionList').innerHTML=S.restrictions.map((r,i)=>{
+    let a=teamObj(r.a),b=teamObj(r.b);
+    return `<div class="card row"><span>${club(a?.club)?.name} · ${a?.name} ↔ ${club(b?.club)?.name} · ${b?.name}</span><span class="pill">${r.type==='never'?'Never Play':'Avoid'}</span><button class="btn tiny" data-rdel="${i}" style="margin-left:auto">Delete</button></div>`;
+  }).join('');
+  document.querySelectorAll('[data-rdel]').forEach(b=>b.onclick=()=>{S.restrictions.splice(+b.dataset.rdel,1);renderRestrictions()});
+}
+
+function renderRules(){$('rules').innerHTML=S.divisions.map(d=>`<div class="rule"><b>${divLabel(d)}</b><div class="grid"><label>Target games per team<input class="rg" data-id="${d.id}" type="number" min="1" value="${d.games}"></label><label>Max meetings / opponent<input class="rm" data-id="${d.id}" type="number" min="1" value="${d.max}"></label></div><div class="note">${weekDates(d).length} playable week(s) in this division.</div></div>`).join('')||'<div class="mini muted">Create divisions first.</div>';document.querySelectorAll('.rg').forEach(x=>x.onchange=()=>div(x.dataset.id).games=Math.max(1,+x.value||1));document.querySelectorAll('.rm').forEach(x=>x.onchange=()=>div(x.dataset.id).max=Math.max(1,+x.value||1))}
+$('restDivision').onchange=refreshRestrictionTeams;
+$('addRestriction').onclick=()=>{let division=$('restDivision').value,a=$('restTeamA').value,b=$('restTeamB').value,type=$('restType').value;if(!division||!a||!b||a===b)return;let ex=restrictionFor(a,b,division);if(ex)ex.type=type;else S.restrictions.push({division,a,b,type});renderRestrictions();};
+function precheck(){let msgs=[];for(const d of S.divisions){let n=S.teams.filter(t=>t.division===d.id).length,w=weekDates(d).length;if(n<2)msgs.push(['bad',`${d.name} needs at least 2 teams.`]);else{let base=Math.floor(n/2)*w,desired=Math.round(n*d.games/2);if(n%2)msgs.push(['soft',`✓ ${d.name}: baseline is ${Math.floor(n/2)} games + 1 BYE each week.`]);if(desired>base)msgs.push(['warn',`${d.name}: target requires ${desired-base} extra game(s); controlled doubleheaders will reduce BYEs.`]);if(desired<base)msgs.push(['warn',`${d.name}: target is below the full weekly baseline, so extra BYEs will be intentional.`])}if(!S.fields.some(f=>f.ages.includes(d.age)))msgs.push(['warn',`${d.name}: no ${d.age}-compatible field is configured.`])}if(!msgs.length)msgs.push(['soft','✓ Setup looks ready.']);$('setupCheck').innerHTML=msgs.map(x=>`<div class="${x[0]}">${x[1]}</div>`).join('');return !msgs.some(x=>x[0]==='bad')}$('checkSetup').onclick=precheck;
+function chooseHomeAway(a,b,homeCount,awayCount,weekIndex,pairIndex){
+  let aHome=homeCount[a]||0,aAway=awayCount[a]||0,bHome=homeCount[b]||0,bAway=awayCount[b]||0;
+  let aNeed=aAway-aHome,bNeed=bAway-bHome;
+  if(aNeed>bNeed)return[a,b];
+  if(bNeed>aNeed)return[b,a];
+  if(aHome<bHome)return[a,b];
+  if(bHome<aHome)return[b,a];
+  return((weekIndex+pairIndex)%2===0)?[a,b]:[b,a];
+}
+function roundRobin(teams,weeks,d){
+  let ids=teams.map(t=>t.id);if(ids.length<2)return[];
+  let wheel=[...ids];if(wheel.length%2===1)wheel.push('BYE');
+  let rounds=[],n=wheel.length;
+  for(let r=0;r<n-1;r++){let pairs=[];for(let i=0;i<n/2;i++)pairs.push([wheel[i],wheel[n-1-i]]);rounds.push(pairs);wheel=[wheel[0],wheel[n-1],...wheel.slice(1,n-1)]}
+  let out=[],meet={},homeCount=Object.fromEntries(ids.map(id=>[id,0])),awayCount=Object.fromEntries(ids.map(id=>[id,0]));
+  for(let wi=0;wi<weeks.length;wi++){
+    let date=weeks[wi],rawPairs=rounds[wi%rounds.length],scheduled=new Set();
+    for(let pi=0;pi<rawPairs.length;pi++){
+      let[a,b]=rawPairs[pi];
+      if(a==='BYE'||b==='BYE'){let real=a==='BYE'?b:a;if(real!=='BYE'){out.push({id:uid('g'),division:d.id,date,home:real,away:'BYE',bye:true,meeting:0});scheduled.add(real)}continue}
+      let rule=restrictionFor(a,b,d.id);if(rule?.type==='never')continue;
+      let k=pk(a,b);meet[k]=(meet[k]||0)+1;
+      let[home,away]=chooseHomeAway(a,b,homeCount,awayCount,wi,pi);homeCount[home]++;awayCount[away]++;
+      out.push({id:uid('g'),division:d.id,date,home,away,bye:false,meeting:meet[k]});scheduled.add(a);scheduled.add(b);
+    }
+    let free=ids.filter(id=>!scheduled.has(id)),ri=0;
+    while(free.length>=2){
+      let best=null;
+      for(let i=0;i<free.length;i++)for(let j=i+1;j<free.length;j++){let a=free[i],b=free[j],rule=restrictionFor(a,b,d.id);if(rule?.type==='never')continue;let prior=meet[pk(a,b)]||0,score=prior*1000+(rule?.type==='avoid'?100:0);if(!best||score<best.score)best={a,b,score}}
+      if(!best)break;
+      let k=pk(best.a,best.b);meet[k]=(meet[k]||0)+1;let[home,away]=chooseHomeAway(best.a,best.b,homeCount,awayCount,wi,ri++);homeCount[home]++;awayCount[away]++;
+      out.push({id:uid('g'),division:d.id,date,home,away,bye:false,meeting:meet[k]});scheduled.add(best.a);scheduled.add(best.b);free=free.filter(id=>id!==best.a&&id!==best.b);
+    }
+    for(const id of free)out.push({id:uid('g'),division:d.id,date,home:id,away:'BYE',bye:true,meeting:0,restrictionBye:true});
+  }
+  return out;
+}
+function addExtraGames(rows,d,teams,weeks){
+  let real=rows.filter(g=>!g.bye);
+  let desired=Math.round(teams.length*d.games/2);
+  let need=Math.max(0,desired-real.length);
+  let meet={};
+  real.forEach(g=>meet[pk(g.home,g.away)]=(meet[pk(g.home,g.away)]||0)+1);
+
+  for(let x=0;x<need;x++){
+    let candidates=[];
+
+    // Prefer converting an existing BYE into a controlled doubleheader:
+    // the bye team plays someone who already has exactly one game that week.
+    for(const date of weeks){
+      let byeRows=rows.filter(g=>g.date===date&&g.bye);
+      let realToday=rows.filter(g=>g.date===date&&!g.bye);
+
+      for(const bye of byeRows){
+        let byeTeam=bye.home;
+        for(const opp of teams){
+          if(opp.id===byeTeam)continue;
+
+          let oppGamesToday=realToday.filter(g=>g.home===opp.id||g.away===opp.id).length;
+          if(oppGamesToday!==1)continue;
+
+          let rule=restrictionFor(byeTeam,opp.id,d.id);
+          if(rule?.type==='never')continue;
+
+          let k=pk(byeTeam,opp.id);
+          let repeats=meet[k]||0;
+          if(repeats>=d.max)continue;
+
+          // Avoid rules remain possible, but are chosen after unrestricted pairings.
+          let score=repeats*50+(rule?.type==='avoid'?200:0);
+
+          // Spread doubleheaders rather than repeatedly using the same team.
+          let byeTeamDH=weeks.filter(w=>real.filter(g=>g.date===w&&(g.home===byeTeam||g.away===byeTeam)).length>1).length;
+          let oppDH=weeks.filter(w=>real.filter(g=>g.date===w&&(g.home===opp.id||g.away===opp.id)).length>1).length;
+          score+=(byeTeamDH+oppDH)*25;
+
+          candidates.push({bye,byeTeam,opp:opp.id,date,score,repeats});
+        }
+      }
+    }
+
+    candidates.sort((a,b)=>a.score-b.score);
+    let c=candidates[0];
+    if(!c)break;
+
+    let k=pk(c.byeTeam,c.opp);
+    meet[k]=(meet[k]||0)+1;
+
+    // Preserve the existing BYE row's stable identity and convert it to a game.
+    let homeCount=real.filter(g=>g.home===c.byeTeam).length;
+    let oppHomeCount=real.filter(g=>g.home===c.opp).length;
+    c.bye.home=homeCount<=oppHomeCount?c.byeTeam:c.opp;
+    c.bye.away=c.bye.home===c.byeTeam?c.opp:c.byeTeam;
+    c.bye.bye=false;
+    c.bye.meeting=meet[k];
+    delete c.bye.restrictionBye;
+
+    real.push(c.bye);
+  }
+}
+
+function trimGames(rows,d,teams){
+  let desired=Math.round(teams.length*d.games/2);
+  let real=rows.filter(g=>!g.bye);
+
+  // If target is below the normal weekly structure, remove games as evenly
+  // as possible and replace them with visible BYEs.
+  while(real.length>desired){
+    let counts=Object.fromEntries(teams.map(t=>[
+      t.id,
+      real.filter(g=>g.home===t.id||g.away===t.id).length
+    ]));
+
+    let candidates=[...real].sort((a,b)=>{
+      let as=counts[a.home]+counts[a.away];
+      let bs=counts[b.home]+counts[b.away];
+      return bs-as;
+    });
+
+    let g=candidates[0];
+    if(!g)break;
+
+    let homeGames=counts[g.home],awayGames=counts[g.away];
+    let byeTeam=homeGames>=awayGames?g.home:g.away;
+
+    g.home=byeTeam;
+    g.away='BYE';
+    g.bye=true;
+    g.meeting=0;
+    g.trimmedBye=true;
+
+    real=rows.filter(x=>!x.bye);
+  }
+}
+
+
+function matchupSanitySummary(d,rows){
+  let real=rows.filter(g=>!g.bye),pairs={};
+  real.forEach(g=>{let k=pk(g.home,g.away);pairs[k]=(pairs[k]||0)+1});
+  let repeated=Object.entries(pairs).filter(([,n])=>n>1);
+  let teams=S.teams.filter(t=>t.division===d.id);
+  let uniquePossible=Math.max(0,teams.length-1);
+  let shouldNeedRepeats=d.games>uniquePossible;
+  if(!repeated.length)return {ok:true,text:'No repeat opponents'};
+  let worst=Math.max(...repeated.map(([,n])=>n));
+  return {
+    ok:shouldNeedRepeats||worst<=2,
+    text:`${repeated.length} repeated pairing${repeated.length===1?'':'s'} • max meetings ${worst}`
+  };
+}
+
+
+function assignStableGameNumbers(){
+  let real=S.weekly.filter(g=>!g.bye);
+  let used=new Set(real.filter(g=>g.gameNo).map(g=>g.gameNo));
+  let next=1;
+  while(used.has(next))next++;
+
+  real
+    .sort((a,b)=>a.date.localeCompare(b.date)||String(a.division).localeCompare(String(b.division)))
+    .forEach(g=>{
+      if(!g.gameNo){
+        while(used.has(next))next++;
+        g.gameNo=next;
+        used.add(next);
+        next++;
+      }
+    });
+}
+
+$('generate').onclick=()=>{
+  try{
+    if(!precheck()){
+      $('genError').innerHTML='<div class="bad">Add at least two teams to each division first.</div>';
+      return;
+    }
+
+    $('genError').innerHTML='';
+    S.weekly=[];
+    let summaries=[];
+
+    for(const d of S.divisions){
+      let teams=S.teams.filter(t=>t.division===d.id);
+      let weeks=weekDates(d);
+
+      if(!weeks.length){
+        summaries.push(`<div class="bad"><b>${divLabel(d)}</b><div class="mini">No playable game dates fall inside this division's start/end dates.</div></div>`);
+        continue;
+      }
+
+      let rows=roundRobin(teams,weeks,d);
+      let base=rows.filter(g=>!g.bye).length;
+      let desired=Math.round(teams.length*d.games/2);
+
+      if(desired>base)addExtraGames(rows,d,teams,weeks);
+      if(desired<base)trimGames(rows,d,teams);
+
+      S.weekly.push(...rows);
+
+      let real=rows.filter(g=>!g.bye);
+      let byes=rows.filter(g=>g.bye).length;
+      let dh=0;
+
+      for(const t of teams){
+        for(const date of weeks){
+          if(real.filter(g=>g.date===date&&(g.home===t.id||g.away===t.id)).length>1)dh++;
+        }
+      }
+
+      let totals=teams.map(t=>real.filter(g=>g.home===t.id||g.away===t.id).length);
+      let sanity=matchupSanitySummary(d,rows);
+
+      summaries.push(
+        `<div class="${!sanity.ok?'bad':(byes||dh?'warn':'soft')}">
+          <b>${divLabel(d)}</b>
+          <div class="mini">
+            ${real.length} games • ${byes} BYEs • ${dh} doubleheader appearances •
+            team totals ${Math.min(...totals)}–${Math.max(...totals)} •
+            target ${d.games} • ${sanity.text}
+          </div>
+        </div>`
+      );
+    }
+
+    assignStableGameNumbers();
+    $('summaries').innerHTML=summaries.join('');
+    $('reviewWrap').classList.remove('hidden');
+
+    if(!S.weekly.length){
+      $('genError').innerHTML='<div class="bad">No matchups were generated. Check division dates and team setup.</div>';
+    }
+  }catch(err){
+    console.error(err);
+    $('genError').innerHTML=`<div class="bad"><b>Matchup generation error:</b> ${err.message}</div>`;
+  }
+};
+function mins(s){let[a,b]=s.split(':').map(Number);return a*60+b}function ft(m){let h=Math.floor(m/60),n=m%60,s=h>=12?'PM':'AM';return`${((h+11)%12)+1}:${String(n).padStart(2,'0')} ${s}`}function overlaps(a1,a2,b1,b2){return a1<b2&&b1<a2}
+function allocate(){let out=[],reservations=[];for(const d of S.divisions){for(const g of S.weekly.filter(g=>g.division===d.id)){if(g.bye){out.push({...g,field:'—',fieldId:'',time:99999});continue}let home=teamObj(g.home),valid=[...S.fields.filter(f=>f.club===home.club&&f.ages.includes(d.age)),...S.fields.filter(f=>f.club!==home.club&&f.ages.includes(d.age))],placed=null;for(const f of valid){for(let t=mins(f.from);t+d.block<=mins(f.to);t+=d.block){let end=t+d.block,busy=reservations.some(r=>{
+          if(r.date!==g.date) return false;
+          const rEnd = r.endTime ?? (r.time + (div(r.division)?.block || d.block));
+          const fieldConflict = r.fieldId===f.id && overlaps(t,end,r.time,rEnd);
+          const teamConflict = (r.home===g.home||r.away===g.home||r.home===g.away||r.away===g.away) && overlaps(t,end,r.time,rEnd);
+          return fieldConflict || teamConflict;
+        });
+        if(busy)continue;
+        placed={...g,field:f.name,fieldId:f.id,time:t,endTime:end,referee:g.referee||'',homeScore:g.homeScore??'',awayScore:g.awayScore??''};
+        reservations.push(placed);
+        break}if(placed)break}out.push(placed||{...g,field:'UNASSIGNED',fieldId:'',time:0,conflict:'No compatible open field/time slot remained'})}}S.allocation=out;renderFinal()}$('build').onclick=()=>{allocate();refreshPersistentNoteOptions();renderPersistentNotes();$('scheduleWrap').classList.remove('hidden');document.querySelectorAll('#adminView .step').forEach((x,i)=>{if(i<7)x.classList.add('collapsed')});$('jumpSchedule').classList.remove('hidden');setTimeout(()=>$('scheduleWrap').scrollIntoView({behavior:'smooth',block:'start'}),50)};
+function repeatNo(g){if(g.bye)return 0;let same=S.weekly.filter(x=>!x.bye&&x.division===g.division&&pk(x.home,x.away)===pk(g.home,g.away)).sort((a,b)=>a.date.localeCompare(b.date));return same.findIndex(x=>x.id===g.id)+1}
+function refreshScheduleAttributeFilters(){
+  let ages=[...new Set(S.divisions.map(d=>d.age))].sort();
+  let genders=[...new Set(S.divisions.map(d=>d.gender))].sort();
+  $('scheduleAgeFilter').innerHTML='<option value="all">Age Group: All</option>'+ages.map(a=>`<option value="${a}" ${S.activeAge===a?'selected':''}>Age Group: ${a}</option>`).join('');
+  $('scheduleGenderFilter').innerHTML='<option value="all">Gender: All</option>'+genders.map(g=>`<option value="${g}" ${S.activeGender===g?'selected':''}>Gender: ${g}</option>`).join('');
+}
+
+function renderFilters(){refreshScheduleAttributeFilters();$('divisionFilters').innerHTML=`<button class="filterbtn ${S.activeDiv==='all'?'active':''}" data-dv="all">All Divisions</button>`+S.divisions.map(d=>`<button class="filterbtn ${S.activeDiv===d.id?'active':''}" data-dv="${d.id}">${d.name}</button>`).join('');document.querySelectorAll('[data-dv]').forEach(b=>b.onclick=()=>{S.activeDiv=b.dataset.dv;renderFinal()})}function visibleGames(){
+  let list=S.allocation;
+  if(S.activeTeam!=='all')list=list.filter(g=>g.home===S.activeTeam||g.away===S.activeTeam);
+  else{
+    if(S.activeDiv!=='all')list=list.filter(g=>g.division===S.activeDiv);
+    if(S.activeAge!=='all')list=list.filter(g=>div(g.division)?.age===S.activeAge);
+    if(S.activeGender!=='all')list=list.filter(g=>div(g.division)?.gender===S.activeGender);
+  }
+  if(S.gameSearch)list=list.filter(g=>String(g.gameNo)===String(S.gameSearch));
+  return list;
+}function gameCountForTeam(tid,date){return S.allocation.filter(g=>!g.bye&&g.date===date&&(g.home===tid||g.away===tid)).length}
+function validationFor(g){if(g.bye)return{type:'',text:'BYE'};let d=div(g.division),issues=[];if(g.home===g.away)issues.push('A team cannot play itself');let f=S.fields.find(x=>x.id===g.fieldId);if(!f)issues.push('Field is not assigned');else if(!f.ages.includes(d.age))issues.push(`${f.name} does not allow ${d.age}`);for(const o of S.allocation){if(o.id===g.id||o.bye||o.date!==g.date||o.time!==g.time)continue;if(g.fieldId&&o.fieldId===g.fieldId)issues.push(`${g.field} is already in use`);if(o.home===g.home||o.away===g.home)issues.push(`${teamObj(g.home)?.name} is double-booked`);if(o.home===g.away||o.away===g.away)issues.push(`${teamObj(g.away)?.name} is double-booked`)}return issues.length?{type:'conflict',text:[...new Set(issues)].join(' • ')}:{type:'',text:'✓ No conflict'}}
+function optionTeams(did,selected,bye=false){let a=S.teams.filter(t=>t.division===did).map(t=>`<option value="${t.id}" ${t.id===selected?'selected':''}>${club(t.club)?.name} · ${t.name}</option>`).join('');if(bye)a+=`<option value="BYE" ${selected==='BYE'?'selected':''}>BYE</option>`;return a}function fieldOptions(g){
+  let d=div(g.division);
+  return `<option value="">Unassigned</option>`+S.fields.map(f=>{
+    let occupied=S.allocation.some(o=>o.id!==g.id&&!o.bye&&o.date===g.date&&o.fieldId===f.id&&o.time===g.time);
+    return `<option value="${f.id}" ${f.id===g.fieldId?'selected':''} ${!f.ages.includes(d.age)?'disabled':''}>${f.name}${occupied?' — in use at current time':''}</option>`;
+  }).join('');
+}function timeOptions(g){let f=S.fields.find(x=>x.id===g.fieldId),d=div(g.division);if(!f)return'<option value="0">Select field first</option>';let out='';for(let t=mins(f.from);t+d.block<=mins(f.to);t+=d.block)out+=`<option value="${t}" ${t===g.time?'selected':''}>${ft(t)}</option>`;return out}
+
+
+
+
+function refreshPersistentNoteOptions(){
+  let teamSel=$('persistentNoteTeam'),divSel=$('persistentNoteDivision'),gameSel=$('persistentNoteGame');
+  if(!teamSel||!divSel||!gameSel)return;
+
+  teamSel.innerHTML='<option value="">— General / No Team —</option>'+S.teams.map(t=>`<option value="${t.id}">${club(t.club)?.name} · ${t.name}</option>`).join('');
+  divSel.innerHTML='<option value="">— No Division —</option>'+S.divisions.map(d=>`<option value="${d.id}">${divLabel(d)}</option>`).join('');
+  gameSel.innerHTML='<option value="">— No Game —</option>'+S.allocation.filter(g=>!g.bye&&g.gameNo).sort((a,b)=>a.gameNo-b.gameNo).map(g=>`<option value="${g.gameNo}">Game ${g.gameNo}</option>`).join('');
+}
+function persistentNoteLabel(n){
+  if(n.gameNo)return `Game ${n.gameNo}${n.division?` · ${div(n.division)?.name||''}`:''}`;
+  if(n.team){let t=teamObj(n.team);return `${club(t?.club)?.name||''} · ${t?.name||'Team'}${n.division?` · ${div(n.division)?.name||''}`:''}`}
+  if(n.division)return div(n.division)?.name||'Division';
+  return 'General';
+}
+function syncNoteFromTeam(){
+  let tid=$('persistentNoteTeam').value;
+  if(!tid)return;
+  let t=teamObj(tid);
+  if(t)$('persistentNoteDivision').value=t.division;
+}
+function syncNoteFromGame(){
+  let no=+$('persistentNoteGame').value;
+  if(!no)return;
+  let g=S.allocation.find(x=>x.gameNo===no);
+  if(!g)return;
+  $('persistentNoteDivision').value=g.division;
+  // don't force team because a game has two teams
+}
+function renderPersistentNotes(){
+  let count=S.notes.filter(n=>!n.resolved).length;
+  if($('persistentNoteCount'))$('persistentNoteCount').textContent=count;
+  if($('noteCount'))$('noteCount').textContent=count;
+  let list=$('persistentNotesList');if(!list)return;
+  list.innerHTML=S.notes.map((n,i)=>`<div class="noteItem ${n.resolved?'resolved':''}">
+    <div class="noteItemRow">
+      <input class="noteCheck" type="checkbox" data-note-check="${i}" ${n.resolved?'checked':''} aria-label="Resolved">
+      <div class="noteMain">
+        <div class="noteTitle">${persistentNoteLabel(n)}</div>
+        <div class="noteTextLine">${n.text}</div>
+        <div class="noteEditFields">
+          <select data-note-team="${i}"><option value="">No Team</option>${S.teams.map(t=>`<option value="${t.id}" ${n.team===t.id?'selected':''}>${club(t.club)?.name} · ${t.name}</option>`).join('')}</select>
+          <select data-note-division="${i}"><option value="">No Division</option>${S.divisions.map(d=>`<option value="${d.id}" ${n.division===d.id?'selected':''}>${divLabel(d)}</option>`).join('')}</select>
+          <select data-note-game="${i}"><option value="">No Game</option>${S.allocation.filter(g=>!g.bye&&g.gameNo).sort((a,b)=>a.gameNo-b.gameNo).map(g=>`<option value="${g.gameNo}" ${String(n.gameNo||'')===String(g.gameNo)?'selected':''}>Game ${g.gameNo}</option>`).join('')}</select>
+        </div>
+      </div>
+      <button class="btn tiny" data-note-delete="${i}">Delete</button>
+    </div>
+  </div>`).join('');
+
+  document.querySelectorAll('[data-note-check]').forEach(el=>el.onchange=()=>{S.notes[+el.dataset.noteCheck].resolved=el.checked;renderPersistentNotes()});
+  document.querySelectorAll('[data-note-delete]').forEach(el=>el.onclick=()=>{S.notes.splice(+el.dataset.noteDelete,1);renderPersistentNotes()});
+  document.querySelectorAll('[data-note-team]').forEach(el=>el.onchange=()=>{let n=S.notes[+el.dataset.noteTeam];n.team=el.value||'';if(n.team){let t=teamObj(n.team);if(t)n.division=t.division}renderPersistentNotes()});
+  document.querySelectorAll('[data-note-division]').forEach(el=>el.onchange=()=>{S.notes[+el.dataset.noteDivision].division=el.value||'';renderPersistentNotes()});
+  document.querySelectorAll('[data-note-game]').forEach(el=>el.onchange=()=>{let n=S.notes[+el.dataset.noteGame];n.gameNo=el.value?+el.value:'';if(n.gameNo){let g=S.allocation.find(x=>x.gameNo===n.gameNo);if(g)n.division=g.division}renderPersistentNotes()});
+}
+function togglePersistentNotes(forceOpen=false){
+  const panel=$('persistentNotesPanel');
+  if(!panel)return;
+  refreshPersistentNoteOptions();
+  renderPersistentNotes();
+  if(forceOpen)panel.classList.remove('hidden');
+  else panel.classList.toggle('hidden');
+}
+if($('persistentNotesBtn'))$('persistentNotesBtn').onclick=()=>togglePersistentNotes(false);
+if($('closePersistentNotes'))$('closePersistentNotes').onclick=()=>$('persistentNotesPanel').classList.add('hidden');
+$('persistentNoteTeam').onchange=syncNoteFromTeam;
+$('persistentNoteGame').onchange=syncNoteFromGame;
+$('addPersistentNote').onclick=()=>{
+  let text=$('persistentNoteText').value.trim();
+  if(!text)return;
+  let team=$('persistentNoteTeam').value||'',division=$('persistentNoteDivision').value||'',gameNo=$('persistentNoteGame').value?+$('persistentNoteGame').value:'';
+  if(team&&!division){let t=teamObj(team);if(t)division=t.division}
+  if(gameNo&&!division){let g=S.allocation.find(x=>x.gameNo===gameNo);if(g)division=g.division}
+  S.notes.unshift({text,team,division,gameNo,resolved:$('persistentNoteResolved').checked});
+  $('persistentNoteText').value='';$('persistentNoteTeam').value='';$('persistentNoteDivision').value='';$('persistentNoteGame').value='';$('persistentNoteResolved').checked=false;
+  renderPersistentNotes();
+};
+
+function setTeamFilter(id){S.activeTeam=id;let t=teamObj(id);if(t)S.activeDiv=t.division;S.activeAge='all';S.activeGender='all';S.gameSearch='';renderFinal();setTimeout(()=>$('scheduleWrap').scrollIntoView({behavior:'smooth',block:'start'}),30)}
+function clearTeamFilter(){S.activeTeam='all';renderFinal()}
+
+$('gameSearchBtn').onclick=()=>{
+  let n=+$('gameSearchInput').value;
+  if(!n)return;
+  let g=S.allocation.find(x=>x.gameNo===n);
+  if(!g){alert(`Game ${n} was not found.`);return}
+  S.gameSearch=String(n);S.activeDiv=g.division;S.activeTeam='all';$('clearGameSearch').classList.remove('hidden');renderFinal();
+  setTimeout(()=>document.querySelector(`[data-game="${g.id}"]`)?.scrollIntoView({behavior:'smooth',block:'center'}),50);
+};
+$('clearGameSearch').onclick=()=>{S.gameSearch='';$('gameSearchInput').value='';$('clearGameSearch').classList.add('hidden');renderFinal()};
+
+
+$('scheduleAgeFilter').onchange=()=>{
+  S.activeAge=$('scheduleAgeFilter').value;
+  S.activeDiv='all';S.activeTeam='all';S.gameSearch='';
+  renderFinal();
+};
+$('scheduleGenderFilter').onchange=()=>{
+  S.activeGender=$('scheduleGenderFilter').value;
+  S.activeDiv='all';S.activeTeam='all';S.gameSearch='';
+  renderFinal();
+};
+
+$('scheduleSort').onchange=()=>renderFinal();
+function renderFinal(){
+  renderFilters();
+  let list=visibleGames(),real=list.filter(g=>!g.bye),byes=list.filter(g=>g.bye).length;
+  let teams=S.activeTeam!=='all'?[teamObj(S.activeTeam)]:(S.activeDiv==='all'?S.teams:S.teams.filter(t=>t.division===S.activeDiv));
+  if(S.activeTeam==='all'&&S.activeAge!=='all')teams=teams.filter(t=>div(t.division)?.age===S.activeAge);
+  if(S.activeTeam==='all'&&S.activeGender!=='all')teams=teams.filter(t=>div(t.division)?.gender===S.activeGender);
+  let totals=teams.map(t=>real.filter(g=>g.home===t.id||g.away===t.id).length),dh=0;
+  for(const t of teams){let d=div(t.division);for(const date of weekDates(d))if(real.filter(g=>g.date===date&&(g.home===t.id||g.away===t.id)).length>1)dh++}
+  let repeats=real.filter(g=>repeatNo(g)>1).length,conflicts=real.filter(g=>validationFor(g).type==='conflict').length;
+  $('teamFilterBanner').innerHTML=S.activeTeam==='all'?'':`<div class="activeTeamFilter"><span>Showing only: <b>${club(teamObj(S.activeTeam).club)?.name} · ${teamObj(S.activeTeam).name}</b></span><button class="btn tiny" onclick="clearTeamFilter()">Show All Teams</button></div>`;
+  $('checker').innerHTML=`<div class="checker"><div class="metric"><b>${teams.length}</b><span>Teams</span></div><div class="metric"><b>${real.length}</b><span>Games</span></div><div class="metric"><b>${totals.length?Math.min(...totals)+'–'+Math.max(...totals):'—'}</b><span>Games / team</span></div><div class="metric"><b>${byes}</b><span>BYEs</span></div><div class="metric"><b>${dh}</b><span>DH appearances</span></div><div class="metric"><b>${repeats}</b><span>Repeat games</span></div><div class="metric"><b>${conflicts}</b><span>Conflicts</span></div></div>`;
+  let dates=[...new Set(list.map(g=>g.date))].sort(),mode=$('scheduleSort')?.value||'default';
+  $('schedule').innerHTML=dates.map((date,wi)=>{
+    let games=list.filter(g=>g.date===date),groups={};games.forEach(g=>(groups[g.division]??=[]).push(g));
+    let rows='';
+    if(mode==='field') rows=[...games].sort((a,b)=>(a.field||'').localeCompare(b.field||'')||a.time-b.time).map(g=>`<div class="divhead">${divLabel(div(g.division))}</div>${renderGame(g)}`).join('');
+    else if(mode==='team') rows=[...games].sort((a,b)=>(teamObj(a.home)?.name||'').localeCompare(teamObj(b.home)?.name||'')).map(g=>`<div class="divhead">${divLabel(div(g.division))}</div>${renderGame(g)}`).join('');
+    else if(mode==='game') rows=[...games].sort((a,b)=>(a.gameNo||9999)-(b.gameNo||9999)).map(g=>`<div class="divhead">${divLabel(div(g.division))}</div>${renderGame(g)}`).join('');
+    else rows=Object.entries(groups).map(([did,arr])=>`<div class="divhead">${divLabel(div(did))}</div>${arr.sort((a,b)=>a.time-b.time).map(g=>renderGame(g)).join('')}`).join('');
+    return`<div class="week"><div class="weekhead"><div class="weektitle">WEEK ${wi+1} — ${dateObj(date).toLocaleDateString('en-US',{timeZone:'UTC',month:'long',day:'numeric'}).toUpperCase()}</div><div class="weekmeta">${games.filter(g=>!g.bye).length} games • ${games.filter(g=>g.bye).length} BYEs</div></div><div class="weekbody">${rows}</div></div>`;
+  }).join('');
+  if(S.activeTeam!=='all')$('schedule').insertAdjacentHTML('beforeend','<div class="bottomClear"><button class="btn" onclick="clearTeamFilter()">Show All Teams</button></div>');
+  bindEditors();renderDiagnostics(real,list);
+}
+
+function byeNumberForTeam(teamId,date){
+  if(!teamId||teamId==='BYE')return 0;
+  return S.allocation.filter(x=>x.bye&&x.home===teamId&&x.date<=date).length;
+}
+function matchupMaxReached(g){
+  if(g.bye)return false;
+  let d=div(g.division);
+  return repeatNo(g)>=d.max;
+}
+function slotOccupiedByOther(g,fieldId,time){
+  if(!fieldId||time==null)return false;
+  return S.allocation.some(o=>o.id!==g.id&&!o.bye&&o.date===g.date&&o.fieldId===fieldId&&o.time===time);
+}
+
+function renderGame(g){
+ let v=validationFor(g),n=repeatNo(g),homeDH=!g.bye&&gameCountForTeam(g.home,g.date)>1,awayDH=!g.bye&&g.away!=='BYE'&&gameCountForTeam(g.away,g.date)>1,dh=homeDH||awayDH,maxed=matchupMaxReached(g),byeNo=g.bye?byeNumberForTeam(g.home,g.date):0;
+ return`<div class="gamecard ${g.bye?'byeRow':''} ${v.type==='conflict'?'conflictCard':''}" data-game="${g.id}"><div class="gameNoCol">${g.bye?'':g.gameNo||''}</div><select class="homeEdit ${g.bye?'byeTeam':(homeDH?'dhTeam':'')}">${optionTeams(g.division,g.home,true)}</select><div class="vs">VS${n>1?`<span class="repeat ${maxed?'maxRepeat':''}">${n}</span>`:''}</div><select class="awayEdit ${awayDH?'dhTeam':''}">${optionTeams(g.division,g.away,true)}</select><select class="fieldEdit" ${g.bye?'disabled':''}>${fieldOptions(g)}</select><div class="dateTimeEdit" style="display:flex;flex-direction:column;gap:5px"><select class="timeEdit" ${g.bye?'disabled':''}>${g.bye?'<option>No Game</option>':timeOptions(g)}</select><input class="dateEdit" type="date" value="${g.date}"></div><div class="statusline ${v.type}">${g.bye?`<span class="byeCountPill">BYE (${byeNo})</span>`:v.text}${dh?' <span class="dh">DOUBLEHEADER</span>':''}${g.bye?'':` <button type="button" class="btn tiny detailToggle">Game Details</button>`}</div>${g.bye?'':`<div class="gameDetails hidden"><label>Referee<input class="refEdit" value="${g.referee||''}" placeholder="Referee"></label><label>Score<div class="scorePair"><input class="homeScore" type="number" min="0" value="${g.homeScore??''}" placeholder="Home score"><input class="awayScore" type="number" min="0" value="${g.awayScore??''}" placeholder="Away score"></div></label><div class="mini muted" style="align-self:end">Game ${g.gameNo||''}</div></div>`}</div>`}
+function bindEditors(){document.querySelectorAll('[data-game]').forEach(card=>{
+  let g=S.allocation.find(x=>x.id===card.dataset.game),
+      h=card.querySelector('.homeEdit'),a=card.querySelector('.awayEdit'),
+      f=card.querySelector('.fieldEdit'),d=card.querySelector('.dateEdit'),
+      t=card.querySelector('.timeEdit'),toggle=card.querySelector('.detailToggle'),
+      details=card.querySelector('.gameDetails'),ref=card.querySelector('.refEdit'),
+      hs=card.querySelector('.homeScore'),as=card.querySelector('.awayScore');
+  if(h)h.onchange=()=>{g.home=h.value;if(g.home==='BYE'&&g.away!=='BYE'){g.home=g.away;g.away='BYE'}g.bye=g.home==='BYE'||g.away==='BYE';if(g.bye){g.field='—';g.fieldId='';g.time=99999}renderFinal()};
+  if(a)a.onchange=()=>{g.away=a.value;if(g.home==='BYE'&&g.away!=='BYE'){g.home=g.away;g.away='BYE'}g.bye=g.home==='BYE'||g.away==='BYE';if(g.bye){g.field='—';g.fieldId='';g.time=99999}renderFinal()};
+  if(f)f.onchange=()=>{g.fieldId=f.value;let ff=S.fields.find(x=>x.id===g.fieldId);g.field=ff?.name||'UNASSIGNED';if(ff)g.time=mins(ff.from);renderFinal()};
+  if(d)d.onchange=()=>{g.date=d.value;renderFinal()};
+  if(t)t.onchange=()=>{g.time=+t.value;renderFinal()};
+  if(toggle&&details)toggle.onclick=()=>details.classList.toggle('hidden');
+  if(ref)ref.onchange=()=>{g.referee=ref.value};
+  if(hs)hs.onchange=()=>{g.homeScore=hs.value===''?'':Math.max(0,+hs.value)};
+  if(as)as.onchange=()=>{g.awayScore=as.value===''?'':Math.max(0,+as.value)};
+})}
+function renderDiagnostics(real,all){
+  let teams=S.activeTeam!=='all'?[teamObj(S.activeTeam)]:(S.activeDiv==='all'?S.teams:S.teams.filter(t=>t.division===S.activeDiv));
+  if(S.activeTeam==='all'&&S.activeAge!=='all')teams=teams.filter(t=>div(t.division)?.age===S.activeAge);
+  if(S.activeTeam==='all'&&S.activeGender!=='all')teams=teams.filter(t=>div(t.division)?.gender===S.activeGender);
+  let stats=teams.filter(Boolean).map(t=>{let d=div(t.division),games=real.filter(g=>g.home===t.id||g.away===t.id),home=games.filter(g=>g.home===t.id).length,away=games.filter(g=>g.away===t.id).length,homeField=games.filter(g=>S.fields.find(f=>f.id===g.fieldId)?.club===t.club).length,bye=all.filter(g=>g.bye&&g.home===t.id).length,dh=weekDates(d).filter(date=>games.filter(g=>g.date===date).length>1).length,opp={};games.forEach(g=>{let oid=g.home===t.id?g.away:g.home;if(oid&&oid!=='BYE')opp[oid]=(opp[oid]||0)+1});let maxRepeat=Math.max(0,...Object.values(opp)),repeats=Math.max(0,maxRepeat-1);return{t,target:d.games,games:games.length,home,away,homeField,bye,dh,maxRepeat,repeats}});
+  $('diagnostics').innerHTML=`<div class="diag"><div class="diaghead">Team Schedule Summary</div><div class="diagbody"><div class="summaryHint">Click a team name to filter the League Schedule to that team for manual adjustments.</div><div class="statgrid" style="grid-template-columns:2fr repeat(8,1fr)"><div><b>Team</b></div><div><b>Games</b></div><div><b>Home</b></div><div><b>Away</b></div><div><b>Home Field</b></div><div><b>BYEs</b></div><div><b>DH</b></div><div><b>Repeats</b></div><div><b>Status</b></div>${stats.map(s=>{let diff=Math.abs(s.home-s.away),warn=diff>1||s.maxRepeat>2||s.dh>1;return`<div><button class="linkTeam" data-team-link="${s.t.id}">${club(s.t.club)?.name} · ${s.t.name}</button><div class="mini muted">${divLabel(div(s.t.division))}</div></div><div>${s.games}/${s.target}</div><div class="${diff>1?'balanceWarn':''}">${s.home}</div><div class="${diff>1?'balanceWarn':''}">${s.away}</div><div>${s.homeField}</div><div>${s.bye}</div><div>${s.dh}</div><div>${s.repeats||'—'}</div><div class="${warn?'':'balanceGood'}">${warn?'Review':'✓'}</div>`}).join('')}</div></div></div>`;document.querySelectorAll('[data-team-link]').forEach(b=>b.onclick=()=>setTeamFilter(b.dataset.teamLink));
+}
+function updateStepSummaries(){
+  let steps=[...document.querySelectorAll('.step')];
+  let summaries=[
+    $('season')?.value?`${$('season').value}${$('leagueStart').value?' • '+$('leagueStart').value:''}${$('leagueEnd').value?' → '+$('leagueEnd').value:''}`:'Season details',
+    `${S.clubs.length} club${S.clubs.length===1?'':'s'}`,
+    `${S.fields.length} field${S.fields.length===1?'':'s'} • ${S.ages.length} age groups`,
+    `${S.divisions.length} division${S.divisions.length===1?'':'s'}`,
+    `${S.teams.length} team${S.teams.length===1?'':'s'}`,
+    `${S.divisions.length} division rule set${S.divisions.length===1?'':'s'}`,
+    `${S.weekly.filter(g=>!g.bye).length} matchups`,
+    `${S.allocation.filter(g=>!g.bye).length} scheduled games`
+  ];
+  steps.forEach((s,i)=>{
+    let title=s.querySelector('.head>div:nth-child(2)');
+    if(!title)return;
+    let old=title.querySelector('.stepSummary');if(old)old.remove();
+    let el=document.createElement('div');el.className='stepSummary';el.textContent=summaries[i]||'';title.appendChild(el);
+  });
+}
+
+let PUB={season:'',clubs:[],divisions:[],teams:[],games:[]};
+function pubClub(id){return PUB.clubs.find(x=>x.id===id)}
+function pubDiv(id){return PUB.divisions.find(x=>x.id===id)}
+function pubTeam(id){return PUB.teams.find(x=>x.id===id)}
+function pubFill(id,vals,label){$(id).innerHTML=`<option value="all">${label}</option>`+vals.map(v=>`<option value="${v.value}">${v.label}</option>`).join('')}
+function pubTeams(){
+ let d=$('pDivision').value||'all',c=$('pClub').value||'all',a=PUB.teams.filter(t=>(d==='all'||t.division===d)&&(c==='all'||t.club===c));
+ pubFill('pTeam',a.map(t=>({value:t.id,label:`${pubClub(t.club)?.name} · ${t.name}`})),'All Teams');
+}
+function pubFilters(){
+ $('pTitle').textContent=(PUB.season||'League')+' Schedule';
+ pubFill('pDivision',PUB.divisions.map(d=>({value:d.id,label:d.name})),'All Divisions');
+ pubFill('pClub',PUB.clubs.map(c=>({value:c.id,label:c.name})),'All Clubs');pubTeams();
+ let dates=[...new Set(PUB.games.map(g=>g.date))].sort();pubFill('pWeek',dates.map((d,i)=>({value:d,label:`Week ${i+1}`})),'All Weeks');
+}
+function pbox(id){let t=pubTeam(id);return `<div class="pteam"><div class="pclub">${pubClub(t.club)?.name||''}</div><div class="ptname">${t.name}</div></div>`}
+function pubRender(){
+ if(!PUB.games.length){$('pSchedule').innerHTML='<div class="pempty">No schedule has been published yet.</div>';return}
+ let d=$('pDivision').value,c=$('pClub').value,t=$('pTeam').value,w=$('pWeek').value;
+ let list=PUB.games.filter(g=>{let h=pubTeam(g.home),a=g.away==='BYE'?null:pubTeam(g.away);return(d==='all'||g.division===d)&&(c==='all'||h?.club===c||a?.club===c)&&(t==='all'||g.home===t||g.away===t)&&(w==='all'||g.date===w)});
+ if(!list.length){$('pSchedule').innerHTML='<div class="pempty">No games match those filters.</div>';return}
+ let allDates=[...new Set(PUB.games.map(g=>g.date))].sort(),dates=[...new Set(list.map(g=>g.date))].sort();
+ $('pSchedule').innerHTML=dates.map(date=>{let day=list.filter(g=>g.date===date),groups={};day.forEach(g=>(groups[g.division]??=[]).push(g));let wk=allDates.indexOf(date)+1,label=new Date(date+'T12:00:00Z').toLocaleDateString('en-US',{timeZone:'UTC',month:'long',day:'numeric'}).toUpperCase();
+ return `<section class="pweek"><div class="pweekhead"><span class="pwk">WEEK ${wk} —</span><span class="pdate">${label}</span></div><div class="pcols"><div>Home</div><div></div><div>Away</div><div class="mobhide">Field</div><div class="mobhide">Time / Date</div></div>${Object.entries(groups).map(([did,a])=>`<div class="pdiv">${pubDiv(did)?.name||''}</div>${a.sort((x,y)=>x.time-y.time).map(g=>g.bye||g.away==='BYE'?`<div class="pgame">${pbox(g.home)}<div class="pvs">VS</div><div class="pbye">BYE</div><div class="pfield">—</div><div class="pwhen"><div class="ptime">No Game</div><div class="pdt">${date}</div></div></div>`:`<div class="pgame">${pbox(g.home)}<div class="pvs">VS</div>${pbox(g.away)}<div class="pfield">${g.field||'TBD'}</div><div class="pwhen"><div class="ptime">${g.time?ft(g.time):'TBD'}</div><div class="pdt">${date}</div></div></div>`).join('')}`).join('')}</section>`}).join('');
+}
+$('jumpSchedule').onclick=()=>{$('scheduleWrap').scrollIntoView({behavior:'smooth',block:'start'})};
+$('publishBtn').onclick=()=>{if(!S.allocation.length){alert('Generate and assign the schedule before publishing.');return}PUB={season:$('season').value.trim()||'League',clubs:S.clubs.map(x=>({...x})),divisions:S.divisions.map(x=>({...x})),teams:S.teams.map(x=>({...x})),games:S.allocation.map(x=>({...x}))};$('pubState').textContent='Published';pubFilters();pubRender()};
+$('adminTab').onclick=()=>{$('adminView').classList.remove('hidden');$('publicView').classList.add('hidden');$('adminTab').classList.add('active');$('publicTab').classList.remove('active')};
+$('publicTab').onclick=()=>{$('adminView').classList.add('hidden');$('publicView').classList.remove('hidden');$('publicTab').classList.add('active');$('adminTab').classList.remove('active');if(PUB.games.length){pubFilters();pubRender()}else pubRender()};
+$('pDivision').onchange=()=>{pubTeams();pubRender()};$('pClub').onchange=()=>{pubTeams();pubRender()};$('pTeam').onchange=pubRender;$('pWeek').onchange=pubRender;
+
+function initCollapsible(){
+  document.querySelectorAll('.step').forEach((s,i)=>{
+    s.querySelector('.head')?.addEventListener('click',e=>{
+      if(e.target.closest('button,input,select,label'))return;
+      s.classList.toggle('collapsed');
+    });
+  });
+  ['season','leagueStart','leagueEnd'].forEach(id=>$(id)?.addEventListener('change',updateStepSummaries));
+  updateStepSummaries();
+}
+initCollapsible();
+sync();
+refreshRestrictionControls();
+renderRestrictions();
+refreshPersistentNoteOptions();
+renderPersistentNotes();
+
+// Final defensive wiring pass for the persistent Notes control.
+if($('persistentNotesBtn')){
+  $('persistentNotesBtn').addEventListener('click',()=>{});
+}
+$('persistentNotesPanel')?.classList.add('hidden');
+
+
+// Draggable Scheduling Notes panel. Drag from its header; the Notes button remains in the top bar.
+(()=>{
+  const panel=$('persistentNotesPanel');
+  const handle=panel?.querySelector('.notesTopBar');
+  if(!panel||!handle)return;
+  let dragging=false,startX=0,startY=0,startLeft=0,startTop=0;
+  handle.addEventListener('pointerdown',e=>{
+    if(e.target.closest('button,input,select,textarea'))return;
+    const r=panel.getBoundingClientRect();
+    panel.style.left=r.left+'px';panel.style.top=r.top+'px';panel.style.right='auto';panel.style.bottom='auto';
+    dragging=true;startX=e.clientX;startY=e.clientY;startLeft=r.left;startTop=r.top;
+    handle.setPointerCapture?.(e.pointerId);
+  });
+  handle.addEventListener('pointermove',e=>{
+    if(!dragging)return;
+    const maxL=Math.max(0,window.innerWidth-panel.offsetWidth);
+    const maxT=Math.max(0,window.innerHeight-60);
+    panel.style.left=Math.min(maxL,Math.max(0,startLeft+e.clientX-startX))+'px';
+    panel.style.top=Math.min(maxT,Math.max(0,startTop+e.clientY-startY))+'px';
+  });
+  const stop=e=>{dragging=false;try{handle.releasePointerCapture?.(e.pointerId)}catch(_){}};
+  handle.addEventListener('pointerup',stop);handle.addEventListener('pointercancel',stop);
+})();
+
+
+$('saveProjectFile').onclick=downloadProject;
+$('loadProjectFile').onchange=async e=>{let f=e.target.files?.[0];if(!f)return;try{S=migrateProject(JSON.parse(await f.text()));renderAllStable();autosaveProject();$('projectSaveStatus').textContent='Project loaded and autosaved'}catch(err){alert('Could not load project: '+err.message)}e.target.value=''};
+document.addEventListener('change',()=>setTimeout(autosaveProject,0));
+document.addEventListener('click',e=>{if(e.target.closest('button'))setTimeout(autosaveProject,0)});
+function appIntegrityCheck(){
+ let req=['roundRobin','addExtraGames','trimGames','assignStableGameNumbers','renderFinal','renderGame','visibleGames','validationFor','fieldOptions','timeOptions','matchupSanitySummary'];
+ let missing=req.filter(n=>typeof window[n]!=='function');if(missing.length)throw new Error('Missing: '+missing.join(', '));
+ let old=S.restrictions;S.restrictions=[];
+ let teams=Array.from({length:5},(_,i)=>({id:'__t'+i,name:'T'+i,division:'__d'})),rows;
+ try{rows=roundRobin(teams,['2026-09-01','2026-09-08','2026-09-15'],{id:'__d',games:3,max:3})}finally{S.restrictions=old}
+ for(const date of ['2026-09-01','2026-09-08','2026-09-15']){
+  let day=rows.filter(g=>g.date===date),real=day.filter(g=>!g.bye),byes=day.filter(g=>g.bye);
+  if(real.length!==2||byes.length!==1)throw new Error('5-team round-robin smoke test failed.');
+  let ids=real.flatMap(g=>[g.home,g.away]);if(new Set(ids).size!==ids.length)throw new Error('Team scheduled twice in smoke-test week.');
+ }
+ let six=Array.from({length:6},(_,i)=>({id:'__b'+i,name:'B'+i,division:'__bd'})),balanced,old2=S.restrictions;S.restrictions=[];try{balanced=roundRobin(six,['2026-09-01','2026-09-08','2026-09-15','2026-09-22','2026-09-29'],{id:'__bd',games:5,max:3})}finally{S.restrictions=old2}for(const t of six){let g=balanced.filter(x=>!x.bye&&(x.home===t.id||x.away===t.id)),h=g.filter(x=>x.home===t.id).length,a=g.filter(x=>x.away===t.id).length;if(Math.abs(h-a)>1)throw new Error('Home/away balance smoke test failed.')}return true;
+}
+try{appIntegrityCheck();console.info('Integrity check passed')}catch(err){console.error(err);setTimeout(()=>{if($('genError'))$('genError').innerHTML=`<div class="bad"><b>App integrity check failed:</b> ${err.message}</div>`},0)}
+try{let raw=localStorage.getItem(AUTOSAVE_KEY);if(raw){let x=migrateProject(JSON.parse(raw));if(x.clubs.length||x.teams.length||x.fields.length){S=x;setTimeout(()=>{renderAllStable();$('projectSaveStatus').textContent='Recovered browser autosave'},0)}}}catch(e){}
+
+</script>
+</body>
+</html>
